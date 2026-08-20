@@ -229,6 +229,12 @@
    "pct_on_time": null,
    "ts_utc": "2026-08-20T16:15:01Z",
    "vehicles": 1141
+  },
+  {
+   "median_delay_s": null,
+   "pct_on_time": null,
+   "ts_utc": "2026-08-20T16:54:34Z",
+   "vehicles": 1146
   }
  ]
 }
