@@ -3,250 +3,278 @@
   {
    "hour": 0,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 1,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 2,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 3,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 4,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 5,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 6,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 7,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 8,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 9,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 10,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 11,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 12,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 13,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 14,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 15,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 16,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 17,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 18,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 19,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 20,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 21,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 22,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   },
   {
    "hour": 23,
    "n": 0,
-   "pct_on_time": null
+   "pct_regular": null
   }
  ],
  "series": [
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T04:37:22Z",
    "vehicles": 662
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T05:03:57Z",
    "vehicles": 622
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T05:42:03Z",
    "vehicles": 422
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T06:17:49Z",
    "vehicles": 299
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T07:11:00Z",
    "vehicles": 186
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T07:59:32Z",
    "vehicles": 170
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T08:49:33Z",
    "vehicles": 243
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T09:20:03Z",
    "vehicles": 494
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T09:54:47Z",
    "vehicles": 894
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T10:25:41Z",
    "vehicles": 1125
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T10:57:18Z",
    "vehicles": 1266
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T11:28:24Z",
    "vehicles": 1357
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T11:55:06Z",
    "vehicles": 1411
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T13:34:57Z",
    "vehicles": 1258
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T14:18:29Z",
    "vehicles": 1160
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T14:59:53Z",
    "vehicles": 1149
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T15:41:42Z",
    "vehicles": 1139
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T16:15:01Z",
    "vehicles": 1141
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T16:54:34Z",
    "vehicles": 1146
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T17:25:18Z",
    "vehicles": 1158
   },
   {
-   "median_delay_s": null,
-   "pct_on_time": null,
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
    "ts_utc": "2026-08-20T17:56:16Z",
    "vehicles": 1182
+  },
+  {
+   "median_headway_s": null,
+   "pct_bunched": null,
+   "pct_regular": null,
+   "ts_utc": "2026-08-20T18:37:40Z",
+   "vehicles": 1315
   }
  ]
 }
