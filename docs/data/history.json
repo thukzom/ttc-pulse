@@ -1,0 +1,1072 @@
+{
+ "by_dow": [
+  {
+   "delay_minutes": 977827.0,
+   "dow": 0,
+   "incidents": 47639
+  },
+  {
+   "delay_minutes": 1003798.0,
+   "dow": 1,
+   "incidents": 51074
+  },
+  {
+   "delay_minutes": 1075182.0,
+   "dow": 2,
+   "incidents": 52262
+  },
+  {
+   "delay_minutes": 1054977.0,
+   "dow": 3,
+   "incidents": 52336
+  },
+  {
+   "delay_minutes": 1080916.0,
+   "dow": 4,
+   "incidents": 54661
+  },
+  {
+   "delay_minutes": 958129.0,
+   "dow": 5,
+   "incidents": 46449
+  },
+  {
+   "delay_minutes": 791720.0,
+   "dow": 6,
+   "incidents": 36464
+  }
+ ],
+ "by_hour": [
+  {
+   "hour": 0,
+   "incidents": 4825,
+   "median_delay": 16.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 0,
+   "incidents": 1899,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 0,
+   "incidents": 1387,
+   "median_delay": 6.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 1,
+   "incidents": 3126,
+   "median_delay": 16.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 1,
+   "incidents": 1640,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 1,
+   "incidents": 1148,
+   "median_delay": 6.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 2,
+   "incidents": 2776,
+   "median_delay": 25.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 2,
+   "incidents": 1394,
+   "median_delay": 16.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 2,
+   "incidents": 177,
+   "median_delay": 7.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 3,
+   "incidents": 2185,
+   "median_delay": 29.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 3,
+   "incidents": 1024,
+   "median_delay": 20.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 3,
+   "incidents": 15,
+   "median_delay": 7.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 4,
+   "incidents": 2804,
+   "median_delay": 20.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 4,
+   "incidents": 1437,
+   "median_delay": 15.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 4,
+   "incidents": 27,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 5,
+   "incidents": 8939,
+   "median_delay": 14.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 5,
+   "incidents": 2213,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 5,
+   "incidents": 1672,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 6,
+   "incidents": 12330,
+   "median_delay": 11.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 6,
+   "incidents": 2282,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 6,
+   "incidents": 2463,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 7,
+   "incidents": 11268,
+   "median_delay": 11.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 7,
+   "incidents": 2112,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 7,
+   "incidents": 1960,
+   "median_delay": 4.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 8,
+   "incidents": 10959,
+   "median_delay": 11.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 8,
+   "incidents": 2182,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 8,
+   "incidents": 2579,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 9,
+   "incidents": 11524,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 9,
+   "incidents": 2628,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 9,
+   "incidents": 1755,
+   "median_delay": 4.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 10,
+   "incidents": 11094,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 10,
+   "incidents": 2512,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 10,
+   "incidents": 1659,
+   "median_delay": 4.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 11,
+   "incidents": 10809,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 11,
+   "incidents": 2347,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 11,
+   "incidents": 1709,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 12,
+   "incidents": 11549,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 12,
+   "incidents": 2701,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 12,
+   "incidents": 1690,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 13,
+   "incidents": 13757,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 13,
+   "incidents": 3102,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 13,
+   "incidents": 1915,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 14,
+   "incidents": 16132,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 14,
+   "incidents": 3288,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 14,
+   "incidents": 2062,
+   "median_delay": 4.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 15,
+   "incidents": 17097,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 15,
+   "incidents": 3304,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 15,
+   "incidents": 2322,
+   "median_delay": 4.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 16,
+   "incidents": 16841,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 16,
+   "incidents": 3550,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 16,
+   "incidents": 2522,
+   "median_delay": 4.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 17,
+   "incidents": 17064,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 17,
+   "incidents": 3035,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 17,
+   "incidents": 2697,
+   "median_delay": 4.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 18,
+   "incidents": 15147,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 18,
+   "incidents": 3003,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 18,
+   "incidents": 2203,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 19,
+   "incidents": 10679,
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 19,
+   "incidents": 2605,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 19,
+   "incidents": 1960,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 20,
+   "incidents": 9618,
+   "median_delay": 14.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 20,
+   "incidents": 2424,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 20,
+   "incidents": 1825,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 21,
+   "incidents": 8722,
+   "median_delay": 15.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 21,
+   "incidents": 2548,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 21,
+   "incidents": 1746,
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 22,
+   "incidents": 6944,
+   "median_delay": 16.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 22,
+   "incidents": 2336,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 22,
+   "incidents": 1787,
+   "median_delay": 6.0,
+   "mode": "subway"
+  },
+  {
+   "hour": 23,
+   "incidents": 5917,
+   "median_delay": 17.0,
+   "mode": "bus"
+  },
+  {
+   "hour": 23,
+   "incidents": 2301,
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "hour": 23,
+   "incidents": 1632,
+   "median_delay": 6.0,
+   "mode": "subway"
+  }
+ ],
+ "by_month": [
+  {
+   "delay_minutes": 153152.0,
+   "incidents": 8571,
+   "median_delay": 10.0,
+   "month": "2022-01"
+  },
+  {
+   "delay_minutes": 128664.0,
+   "incidents": 5911,
+   "median_delay": 10.0,
+   "month": "2022-02"
+  },
+  {
+   "delay_minutes": 99458.0,
+   "incidents": 6319,
+   "median_delay": 10.0,
+   "month": "2022-03"
+  },
+  {
+   "delay_minutes": 104593.0,
+   "incidents": 6453,
+   "median_delay": 10.0,
+   "month": "2022-04"
+  },
+  {
+   "delay_minutes": 121132.0,
+   "incidents": 6631,
+   "median_delay": 10.0,
+   "month": "2022-05"
+  },
+  {
+   "delay_minutes": 121676.0,
+   "incidents": 6648,
+   "median_delay": 10.0,
+   "month": "2022-06"
+  },
+  {
+   "delay_minutes": 133873.0,
+   "incidents": 7834,
+   "median_delay": 10.0,
+   "month": "2022-07"
+  },
+  {
+   "delay_minutes": 134141.0,
+   "incidents": 7578,
+   "median_delay": 10.0,
+   "month": "2022-08"
+  },
+  {
+   "delay_minutes": 127515.0,
+   "incidents": 6922,
+   "median_delay": 10.0,
+   "month": "2022-09"
+  },
+  {
+   "delay_minutes": 134439.0,
+   "incidents": 6419,
+   "median_delay": 10.0,
+   "month": "2022-10"
+  },
+  {
+   "delay_minutes": 117268.0,
+   "incidents": 6156,
+   "median_delay": 10.0,
+   "month": "2022-11"
+  },
+  {
+   "delay_minutes": 129588.0,
+   "incidents": 6163,
+   "median_delay": 10.0,
+   "month": "2022-12"
+  },
+  {
+   "delay_minutes": 115377.0,
+   "incidents": 5275,
+   "median_delay": 10.0,
+   "month": "2023-01"
+  },
+  {
+   "delay_minutes": 108247.0,
+   "incidents": 5405,
+   "median_delay": 10.0,
+   "month": "2023-02"
+  },
+  {
+   "delay_minutes": 115315.0,
+   "incidents": 5579,
+   "median_delay": 10.0,
+   "month": "2023-03"
+  },
+  {
+   "delay_minutes": 96542.0,
+   "incidents": 5206,
+   "median_delay": 10.0,
+   "month": "2023-04"
+  },
+  {
+   "delay_minutes": 108638.0,
+   "incidents": 5254,
+   "median_delay": 10.0,
+   "month": "2023-05"
+  },
+  {
+   "delay_minutes": 118303.0,
+   "incidents": 5591,
+   "median_delay": 10.0,
+   "month": "2023-06"
+  },
+  {
+   "delay_minutes": 125949.0,
+   "incidents": 6428,
+   "median_delay": 10.0,
+   "month": "2023-07"
+  },
+  {
+   "delay_minutes": 133656.0,
+   "incidents": 6553,
+   "median_delay": 10.0,
+   "month": "2023-08"
+  },
+  {
+   "delay_minutes": 128907.0,
+   "incidents": 6300,
+   "median_delay": 10.0,
+   "month": "2023-09"
+  },
+  {
+   "delay_minutes": 129168.0,
+   "incidents": 7033,
+   "median_delay": 10.0,
+   "month": "2023-10"
+  },
+  {
+   "delay_minutes": 126439.0,
+   "incidents": 6855,
+   "median_delay": 10.0,
+   "month": "2023-11"
+  },
+  {
+   "delay_minutes": 124092.0,
+   "incidents": 6888,
+   "median_delay": 10.0,
+   "month": "2023-12"
+  },
+  {
+   "delay_minutes": 128551.0,
+   "incidents": 6442,
+   "median_delay": 10.0,
+   "month": "2024-01"
+  },
+  {
+   "delay_minutes": 120744.0,
+   "incidents": 5629,
+   "median_delay": 10.0,
+   "month": "2024-02"
+  },
+  {
+   "delay_minutes": 162259.0,
+   "incidents": 6172,
+   "median_delay": 10.0,
+   "month": "2024-03"
+  },
+  {
+   "delay_minutes": 135183.0,
+   "incidents": 6179,
+   "median_delay": 10.0,
+   "month": "2024-04"
+  },
+  {
+   "delay_minutes": 136611.0,
+   "incidents": 6587,
+   "median_delay": 10.0,
+   "month": "2024-05"
+  },
+  {
+   "delay_minutes": 125915.0,
+   "incidents": 6383,
+   "median_delay": 10.0,
+   "month": "2024-06"
+  },
+  {
+   "delay_minutes": 126214.0,
+   "incidents": 6499,
+   "median_delay": 10.0,
+   "month": "2024-07"
+  },
+  {
+   "delay_minutes": 137391.0,
+   "incidents": 6608,
+   "median_delay": 11.0,
+   "month": "2024-08"
+  },
+  {
+   "delay_minutes": 121131.0,
+   "incidents": 5941,
+   "median_delay": 10.0,
+   "month": "2024-09"
+  },
+  {
+   "delay_minutes": 119549.0,
+   "incidents": 5740,
+   "median_delay": 11.0,
+   "month": "2024-10"
+  },
+  {
+   "delay_minutes": 131032.0,
+   "incidents": 5667,
+   "median_delay": 11.0,
+   "month": "2024-11"
+  },
+  {
+   "delay_minutes": 122492.0,
+   "incidents": 6208,
+   "median_delay": 11.0,
+   "month": "2024-12"
+  },
+  {
+   "delay_minutes": 95306.0,
+   "incidents": 5133,
+   "median_delay": 10.0,
+   "month": "2025-01"
+  },
+  {
+   "delay_minutes": 165633.0,
+   "incidents": 7216,
+   "median_delay": 10.0,
+   "month": "2025-02"
+  },
+  {
+   "delay_minutes": 126919.0,
+   "incidents": 5894,
+   "median_delay": 11.0,
+   "month": "2025-03"
+  },
+  {
+   "delay_minutes": 132665.0,
+   "incidents": 5727,
+   "median_delay": 11.0,
+   "month": "2025-04"
+  },
+  {
+   "delay_minutes": 135246.0,
+   "incidents": 6171,
+   "median_delay": 11.0,
+   "month": "2025-05"
+  },
+  {
+   "delay_minutes": 143364.0,
+   "incidents": 6669,
+   "median_delay": 11.0,
+   "month": "2025-06"
+  },
+  {
+   "delay_minutes": 138779.0,
+   "incidents": 6293,
+   "median_delay": 12.0,
+   "month": "2025-07"
+  },
+  {
+   "delay_minutes": 141974.0,
+   "incidents": 6591,
+   "median_delay": 11.0,
+   "month": "2025-08"
+  },
+  {
+   "delay_minutes": 123330.0,
+   "incidents": 6013,
+   "median_delay": 10.0,
+   "month": "2025-09"
+  },
+  {
+   "delay_minutes": 130628.0,
+   "incidents": 6201,
+   "median_delay": 11.0,
+   "month": "2025-10"
+  },
+  {
+   "delay_minutes": 131652.0,
+   "incidents": 6539,
+   "median_delay": 12.0,
+   "month": "2025-11"
+  },
+  {
+   "delay_minutes": 145318.0,
+   "incidents": 6924,
+   "median_delay": 12.0,
+   "month": "2025-12"
+  },
+  {
+   "delay_minutes": 183725.0,
+   "incidents": 7341,
+   "median_delay": 12.0,
+   "month": "2026-01"
+  },
+  {
+   "delay_minutes": 140311.0,
+   "incidents": 5892,
+   "median_delay": 12.0,
+   "month": "2026-02"
+  },
+  {
+   "delay_minutes": 127134.0,
+   "incidents": 6427,
+   "median_delay": 11.0,
+   "month": "2026-03"
+  },
+  {
+   "delay_minutes": 120557.0,
+   "incidents": 6186,
+   "median_delay": 10.0,
+   "month": "2026-04"
+  },
+  {
+   "delay_minutes": 133139.0,
+   "incidents": 6108,
+   "median_delay": 12.0,
+   "month": "2026-05"
+  },
+  {
+   "delay_minutes": 123665.0,
+   "incidents": 5533,
+   "median_delay": 12.0,
+   "month": "2026-06"
+  }
+ ],
+ "by_year": [
+  {
+   "delay_minutes": 1180912.0,
+   "incidents": 58707,
+   "mode": "bus",
+   "year": 2022
+  },
+  {
+   "delay_minutes": 251481.0,
+   "incidents": 17655,
+   "mode": "streetcar",
+   "year": 2022
+  },
+  {
+   "delay_minutes": 73106.0,
+   "incidents": 19895,
+   "mode": "subway",
+   "year": 2022
+  },
+  {
+   "delay_minutes": 1138282.0,
+   "incidents": 56207,
+   "mode": "bus",
+   "year": 2023
+  },
+  {
+   "delay_minutes": 224172.0,
+   "incidents": 14413,
+   "mode": "streetcar",
+   "year": 2023
+  },
+  {
+   "delay_minutes": 68179.0,
+   "incidents": 22949,
+   "mode": "subway",
+   "year": 2023
+  },
+  {
+   "delay_minutes": 1265531.0,
+   "incidents": 59643,
+   "mode": "bus",
+   "year": 2024
+  },
+  {
+   "delay_minutes": 227267.0,
+   "incidents": 14206,
+   "mode": "streetcar",
+   "year": 2024
+  },
+  {
+   "delay_minutes": 74274.0,
+   "incidents": 26467,
+   "mode": "subway",
+   "year": 2024
+  },
+  {
+   "delay_minutes": 1287159.0,
+   "incidents": 63029,
+   "mode": "bus",
+   "year": 2025
+  },
+  {
+   "delay_minutes": 252887.0,
+   "incidents": 14445,
+   "mode": "streetcar",
+   "year": 2025
+  },
+  {
+   "delay_minutes": 70768.0,
+   "incidents": 25737,
+   "mode": "subway",
+   "year": 2025
+  },
+  {
+   "delay_minutes": 655388.0,
+   "incidents": 30534,
+   "mode": "bus",
+   "year": 2026
+  },
+  {
+   "delay_minutes": 130769.0,
+   "incidents": 7267,
+   "mode": "streetcar",
+   "year": 2026
+  },
+  {
+   "delay_minutes": 42374.0,
+   "incidents": 14919,
+   "mode": "subway",
+   "year": 2026
+  }
+ ],
+ "meta": {
+  "first_date": "2022-01-01",
+  "last_date": "2026-06-30",
+  "modes": [
+   "bus",
+   "streetcar",
+   "subway"
+  ],
+  "rows": 446073,
+  "rows_with_delay": 340885,
+  "total_delay_hours": 115709.1
+ },
+ "top_causes": [
+  {
+   "cause": "Diversion",
+   "delay_minutes": 1493753.0,
+   "incidents": 13696
+  },
+  {
+   "cause": "Mechanical",
+   "delay_minutes": 789934.0,
+   "incidents": 59482
+  },
+  {
+   "cause": "MFDV",
+   "delay_minutes": 773481.0,
+   "incidents": 6206
+  },
+  {
+   "cause": "Operations - Operator",
+   "delay_minutes": 575117.0,
+   "incidents": 40209
+  },
+  {
+   "cause": "General Delay",
+   "delay_minutes": 254495.0,
+   "incidents": 10037
+  },
+  {
+   "cause": "EFO",
+   "delay_minutes": 249744.0,
+   "incidents": 17753
+  },
+  {
+   "cause": "Security",
+   "delay_minutes": 210235.0,
+   "incidents": 13751
+  },
+  {
+   "cause": "Emergency Services",
+   "delay_minutes": 149042.0,
+   "incidents": 9817
+  },
+  {
+   "cause": "Collision - TTC",
+   "delay_minutes": 142132.0,
+   "incidents": 10365
+  },
+  {
+   "cause": "Operations",
+   "delay_minutes": 124723.0,
+   "incidents": 12457
+  },
+  {
+   "cause": "TFCNO",
+   "delay_minutes": 124098.0,
+   "incidents": 8500
+  },
+  {
+   "cause": "Cleaning - Unsanitary",
+   "delay_minutes": 122277.0,
+   "incidents": 9382
+  }
+ ],
+ "worst_lines": [
+  {
+   "delay_minutes": 176733.0,
+   "incidents": 23303,
+   "line": "YU",
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "delay_minutes": 160393.0,
+   "incidents": 10226,
+   "line": "501",
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "delay_minutes": 126376.0,
+   "incidents": 15194,
+   "line": "BD",
+   "median_delay": 5.0,
+   "mode": "subway"
+  },
+  {
+   "delay_minutes": 112642.0,
+   "incidents": 7457,
+   "line": "504",
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "delay_minutes": 103728.0,
+   "incidents": 4927,
+   "line": "506",
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "delay_minutes": 94871.0,
+   "incidents": 5139,
+   "line": "505",
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "delay_minutes": 92399.0,
+   "incidents": 4519,
+   "line": "52",
+   "median_delay": 19.0,
+   "mode": "bus"
+  },
+  {
+   "delay_minutes": 90360.0,
+   "incidents": 5264,
+   "line": "32",
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "delay_minutes": 79057.0,
+   "incidents": 4813,
+   "line": "36",
+   "median_delay": 6.0,
+   "mode": "bus"
+  },
+  {
+   "delay_minutes": 72531.0,
+   "incidents": 3026,
+   "line": "504 KING",
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "delay_minutes": 68403.0,
+   "incidents": 2963,
+   "line": "501 QUEEN",
+   "median_delay": 10.0,
+   "mode": "streetcar"
+  },
+  {
+   "delay_minutes": 62255.0,
+   "incidents": 2320,
+   "line": "96",
+   "median_delay": 20.0,
+   "mode": "bus"
+  },
+  {
+   "delay_minutes": 62126.0,
+   "incidents": 3775,
+   "line": "35",
+   "median_delay": 9.0,
+   "mode": "bus"
+  },
+  {
+   "delay_minutes": 59442.0,
+   "incidents": 2641,
+   "line": "102",
+   "median_delay": 12.0,
+   "mode": "bus"
+  },
+  {
+   "delay_minutes": 58764.0,
+   "incidents": 3687,
+   "line": "29",
+   "median_delay": 8.0,
+   "mode": "bus"
+  }
+ ]
+}
