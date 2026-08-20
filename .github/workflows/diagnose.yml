@@ -1,0 +1,107 @@
+name: Diagnose feed
+
+# One-off diagnostic. Prints exactly what the TTC realtime feeds contain so we can
+# see why trip delays are coming back empty. Reads only - writes nothing, commits
+# nothing. Safe to run any time, safe to delete when we're done.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests gtfs-realtime-bindings
+
+      - name: Inspect the feeds
+        run: |
+          python - <<'PY'
+          import requests
+          from collections import Counter
+          from google.transit import gtfs_realtime_pb2 as pb
+
+          UA = {"User-Agent": "ttc-pulse-diagnostic"}
+          FEEDS = {
+              "vehicles": "https://bustime.ttc.ca/gtfsrt/vehicles",
+              "trips":    "https://bustime.ttc.ca/gtfsrt/trips",
+              "alerts":   "https://bustime.ttc.ca/gtfsrt/alerts",
+              # Alternate spellings other agencies use - checking in case ours is wrong.
+              "tripupdates(alt)": "https://bustime.ttc.ca/gtfsrt/tripupdates",
+              "tripUpdates(alt)": "https://bustime.ttc.ca/gtfsrt/tripUpdates",
+          }
+
+          for name, url in FEEDS.items():
+              print("=" * 70)
+              print(name, url)
+              try:
+                  r = requests.get(url, headers=UA, timeout=45)
+                  print(f"  HTTP {r.status_code}, {len(r.content):,} bytes, "
+                        f"content-type={r.headers.get('content-type')}")
+                  if r.status_code != 200 or not r.content:
+                      continue
+                  feed = pb.FeedMessage()
+                  feed.ParseFromString(r.content)
+                  print(f"  entities: {len(feed.entity)}")
+              except Exception as e:
+                  print(f"  FAILED: {type(e).__name__}: {e}")
+                  continue
+
+              kinds = Counter()
+              for ent in feed.entity:
+                  for k in ("vehicle", "trip_update", "alert"):
+                      if ent.HasField(k):
+                          kinds[k] += 1
+              print(f"  entity kinds: {dict(kinds)}")
+
+              if not kinds.get("trip_update"):
+                  continue
+
+              # This is the question: where, if anywhere, does delay live?
+              stats = Counter()
+              n_stu = []
+              for ent in feed.entity:
+                  if not ent.HasField("trip_update"):
+                      continue
+                  tu = ent.trip_update
+                  stats["trip_updates"] += 1
+                  if tu.HasField("delay"):
+                      stats["has top-level delay"] += 1
+                  if tu.trip.route_id:
+                      stats["has route_id"] += 1
+                  n_stu.append(len(tu.stop_time_update))
+                  for stu in tu.stop_time_update:
+                      if stu.HasField("arrival"):
+                          stats["arrival present"] += 1
+                          if stu.arrival.HasField("delay"):
+                              stats["  arrival.delay"] += 1
+                          if stu.arrival.HasField("time"):
+                              stats["  arrival.time"] += 1
+                      if stu.HasField("departure"):
+                          stats["departure present"] += 1
+                          if stu.departure.HasField("delay"):
+                              stats["  departure.delay"] += 1
+                          if stu.departure.HasField("time"):
+                              stats["  departure.time"] += 1
+
+              print("  --- field availability ---")
+              for k, v in stats.items():
+                  print(f"    {k}: {v:,}")
+              if n_stu:
+                  print(f"    stop_time_updates per trip: min={min(n_stu)} "
+                        f"max={max(n_stu)} avg={sum(n_stu)/len(n_stu):.1f}")
+
+              print("  --- first trip_update verbatim ---")
+              for ent in feed.entity:
+                  if ent.HasField("trip_update"):
+                      text = str(ent)
+                      print("   " + text[:1500].replace("\n", "\n   "))
+                      break
+          print("=" * 70)
+          print("done")
+          PY
