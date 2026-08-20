@@ -1,0 +1,64 @@
+name: Collect realtime snapshot
+
+# Samples the TTC live feed and commits the result back to this repository.
+# The commit IS the database: every 10-minute snapshot is a durable, auditable
+# row in git history, with no server and no hosting cost.
+
+on:
+  schedule:
+    # Every 10 minutes. GitHub's scheduler is best-effort and runs late under
+    # load, so treat the cadence as "roughly every 10 minutes" rather than a
+    # guarantee. Gaps in the series are expected and are visible in the chart.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:        # lets you trigger a run by hand from the Actions tab
+
+permissions:
+  contents: write           # needed to push the collected data back
+
+concurrency:
+  # If a run is slow, skip the next one rather than letting two runs race to
+  # append to the same CSV and push conflicting commits.
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Collect snapshot
+        # The static GTFS bundle (route names) only changes every ~6 weeks, so
+        # it is refreshed in the first run after midnight UTC on Mondays rather
+        # than on all ~4,000 runs a month. Every other run reads the cached copy.
+        run: |
+          if [ "$(date -u +%u)" = "1" ] && [ "$(date -u +%H)" = "00" ]; then
+            echo "weekly route-name refresh"
+            python src/collect_realtime.py --refresh-routes
+          else
+            python src/collect_realtime.py
+          fi
+
+      - name: Commit data
+        run: |
+          git config user.name  "ttc-pulse-bot"
+          git config user.email "actions@github.com"
+          git add data/ docs/data/
+          if git diff --staged --quiet; then
+            echo "no change to commit"
+          else
+            git commit -m "data: snapshot $(date -u +'%Y-%m-%dT%H:%MZ')"
+            # Another scheduled run may have pushed while this one was working;
+            # rebase rather than fail, since our change is a pure append.
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            git push
+          fi
