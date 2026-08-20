@@ -1,6 +1,6 @@
 {
  "best_routes": [],
- "generated_utc": "2026-08-20T17:25:18Z",
+ "generated_utc": "2026-08-20T17:56:16Z",
  "system": {
   "alerts": 76,
   "median_delay_s": null,
@@ -9,9 +9,9 @@
   "pct_late": null,
   "pct_on_time": null,
   "routes_rankable": 0,
-  "routes_reporting": 182,
+  "routes_reporting": 183,
   "trips": 0,
-  "vehicles": 1158
+  "vehicles": 1182
  },
  "worst_routes": []
 }
