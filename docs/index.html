@@ -147,14 +147,29 @@ footer a { color: var(--ink-2); }
       <h1>TTC Pulse</h1>
       <p class="sub">
         Surface-network reliability for the Toronto Transit Commission, sampled from the
-        agency's live GTFS-Realtime feed every 10 minutes and set against ten years of
-        published delay records. A trip counts as <strong>on time</strong> when it is running
-        between 1 minute early and 5 minutes late.
+        agency's live GTFS-Realtime feed every 10 minutes and set against a decade of
+        published delay records.
       </p>
       <p class="stamp" id="stamp">Loading…</p>
     </div>
     <button class="ghost" id="theme-btn" aria-label="Switch colour theme">Dark mode</button>
   </header>
+
+  <div class="card" style="margin-bottom:20px">
+    <p class="sub" style="margin:0">
+      <strong>Why headway regularity, not on-time performance?</strong>
+      The TTC's realtime feed publishes predicted arrival times for trips marked
+      <code>schedule_relationship: NEW</code> &mdash; trips with no counterpart in the
+      published timetable &mdash; and carries no delay field at all. There is no scheduled
+      time to subtract, so punctuality is not computable from it. What is computable is the
+      measure that matters more on frequent service anyway: whether vehicles are
+      <strong>evenly spaced</strong>. A rider who turns up without checking a timetable does
+      not care that a bus is six minutes behind a schedule they never read &mdash; they care
+      that three arrived together and then nothing came for twenty minutes. A gap counts as
+      <strong>regular</strong> when it falls within 50&ndash;150% of the average headway at
+      that stop, <strong>bunched</strong> when shorter, <strong>gapped</strong> when longer.
+    </p>
+  </div>
 
   <div id="demo-banner" class="banner hidden">
     <strong>Preview data.</strong> This page is currently showing synthetic sample data so the
@@ -173,16 +188,16 @@ footer a { color: var(--ink-2); }
 
     <div class="grid g-2" style="margin-top:16px">
       <div class="card">
-        <div class="chart-head"><h3 class="chart-title">On-time performance, past 7 days</h3></div>
-        <p class="chart-sub">Share of tracked trips running on time, one point per 10-minute sample.</p>
+        <div class="chart-head"><h3 class="chart-title">Service regularity, past 7 days</h3></div>
+        <p class="chart-sub">Share of measured headways that were evenly spaced, one point per 10-minute sample.</p>
         <div class="chart-host" id="c-trend"></div>
         <button class="tbl-toggle" data-table="t-trend">Show data table</button>
         <div id="t-trend" class="hidden"></div>
       </div>
 
       <div class="card">
-        <div class="chart-head"><h3 class="chart-title">Least reliable routes right now</h3></div>
-        <p class="chart-sub">Routes with at least 5 reporting vehicles, ranked by on-time share.</p>
+        <div class="chart-head"><h3 class="chart-title">Most irregular routes right now</h3></div>
+        <p class="chart-sub">Routes with enough measured headways to rank, worst spacing first.</p>
         <div class="chart-host" id="c-worst"></div>
         <button class="tbl-toggle" data-table="t-worst">Show data table</button>
         <div id="t-worst" class="hidden"></div>
@@ -191,7 +206,7 @@ footer a { color: var(--ink-2); }
 
     <div class="card" style="margin-top:16px">
       <div class="chart-head"><h3 class="chart-title">When the system struggles</h3></div>
-      <p class="chart-sub">Average on-time share by hour of the Toronto day, across every sample collected so far.</p>
+      <p class="chart-sub">Average share of evenly-spaced headways by hour of the Toronto day, across every sample so far.</p>
       <div class="chart-host" id="c-hourly"></div>
       <button class="tbl-toggle" data-table="t-hourly">Show data table</button>
       <div id="t-hourly" class="hidden"></div>
@@ -272,6 +287,7 @@ const fmt = {
   int:  n => (n === null || n === undefined || Number.isNaN(n)) ? "–" : Math.round(n).toLocaleString("en-CA"),
   pct1: n => (n === null || n === undefined || Number.isNaN(n)) ? "–" : n.toFixed(1) + "%",
   mins: s => (s === null || s === undefined || Number.isNaN(s)) ? "–" : (s / 60).toFixed(1) + " min",
+  cv:   v => (v === null || v === undefined || Number.isNaN(v)) ? "–" : v.toFixed(2),
   hour: h => { const ampm = h < 12 ? "am" : "pm"; const hh = h % 12 === 0 ? 12 : h % 12; return hh + ampm; },
   month: m => { const [y, mo] = m.split("-"); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+mo - 1] + " " + y; },
   clock: iso => new Date(iso).toLocaleString("en-CA", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
@@ -542,10 +558,10 @@ $$(".tbl-toggle").forEach(btn => btn.addEventListener("click", () => {
 /* ---------------- status helpers ---------------- */
 function reliabilityStatus(p) {
   if (p === null || p === undefined) return { var: "--ink-muted", word: "No data", mark: "–" };
-  if (p >= 75) return { var: "--good",     word: "Running well", mark: "●" };
-  if (p >= 60) return { var: "--warning",  word: "Some slippage", mark: "▲" };
-  if (p >= 45) return { var: "--serious",  word: "Degraded",      mark: "▲" };
-  return         { var: "--critical", word: "Widespread delays",  mark: "■" };
+  if (p >= 80) return { var: "--good",     word: "Evenly spaced",   mark: "✓" };
+  if (p >= 65) return { var: "--warning",  word: "Some bunching",   mark: "▲" };
+  if (p >= 50) return { var: "--serious",  word: "Bunching",        mark: "◆" };
+  return         { var: "--critical", word: "Heavy bunching",  mark: "■" };
 }
 
 /* ====================================================================
@@ -569,13 +585,14 @@ function renderTiles() {
       '<p class="empty">Waiting for the first collection run.</p></div>';
     return;
   }
-  const st = reliabilityStatus(s.pct_on_time);
+  const st = reliabilityStatus(s.pct_regular);
   const tiles = [
-    { label: "On time now", value: fmt.pct1(s.pct_on_time),
+    { label: "Evenly spaced now", value: fmt.pct1(s.pct_regular),
       foot: `<span class="pill"><span class="dot" style="background:${cssVar(st.var)}"></span>${st.mark} ${st.word}</span>` },
     { label: "Vehicles tracked", value: fmt.int(s.vehicles), foot: `across ${fmt.int(s.routes_reporting)} routes` },
-    { label: "Median delay", value: fmt.mins(s.median_delay_s), foot: `90th percentile ${fmt.mins(s.p90_delay_s)}` },
-    { label: "Service alerts", value: fmt.int(s.alerts), foot: "active on the network" },
+    { label: "Median headway", value: fmt.mins(s.median_headway_s),
+      foot: `${fmt.int(s.gaps)} headways at ${fmt.int(s.stops_measured)} stops` },
+    { label: "Bunched", value: fmt.pct1(s.pct_bunched), foot: `${fmt.pct1(s.pct_gapped)} left a gap` },
   ];
   host.innerHTML = tiles.map(t =>
     `<div class="card tile"><div class="label">${t.label}</div>
@@ -587,43 +604,46 @@ function renderTrend() {
   const host = $("#c-trend");
   if (!series.length) { host.innerHTML = '<p class="empty">Waiting for the first collection run.</p>'; return; }
   lineChart(host, {
-    series: [{ name: "On time", colorVar: "--series-1", values: series.map(d => d.pct_on_time) }],
+    series: [{ name: "Evenly spaced", colorVar: "--series-1", values: series.map(d => d.pct_regular) }],
     yLabel: v => Math.round(v) + "%",
     xLabel: i => fmt.day(series[i].ts_utc),
     tooltipTitle: i => fmt.clock(series[i].ts_utc),
-    tooltipRows: i => [["On time", fmt.pct1(series[i].pct_on_time)],
-                       ["Median delay", fmt.mins(series[i].median_delay_s)],
+    tooltipRows: i => [["Evenly spaced", fmt.pct1(series[i].pct_regular)],
+                       ["Bunched", fmt.pct1(series[i].pct_bunched)],
+                       ["Median headway", fmt.mins(series[i].median_headway_s)],
                        ["Vehicles", fmt.int(series[i].vehicles)]],
     height: 236,
   });
-  renderTable("t-trend", ["Time", "On time", "Median delay", "Vehicles"],
-    series.slice(-48).reverse().map(d => [fmt.clock(d.ts_utc), fmt.pct1(d.pct_on_time),
-                                          fmt.mins(d.median_delay_s), fmt.int(d.vehicles)]));
+  renderTable("t-trend", ["Time", "Evenly spaced", "Bunched", "Median headway", "Vehicles"],
+    series.slice(-48).reverse().map(d => [fmt.clock(d.ts_utc), fmt.pct1(d.pct_regular),
+      fmt.pct1(d.pct_bunched), fmt.mins(d.median_headway_s), fmt.int(d.vehicles)]));
 }
 
 function renderWorst() {
   const rows = (state.live && state.live.worst_routes) || [];
   barsH($("#c-worst"), {
-    rows, value: r => r.pct_on_time, label: r => r.route_name || r.route_id,
+    rows, value: r => r.pct_regular, label: r => r.route_name || r.route_id,
     colorVar: "--series-2", valueLabel: v => v.toFixed(0) + "%",
-    tooltipRows: r => [["On time", fmt.pct1(r.pct_on_time)], ["Median delay", fmt.mins(r.median_delay_s)],
-                       ["Vehicles reporting", fmt.int(r.n_trips)]],
+    tooltipRows: r => [["Evenly spaced", fmt.pct1(r.pct_regular)], ["Bunched", fmt.pct1(r.pct_bunched)],
+                       ["Median headway", fmt.mins(r.median_headway_s)],
+                       ["Headway variability", fmt.cv(r.headway_cv)],
+                       ["Headways measured", fmt.int(r.n_gaps)]],
   });
-  renderTable("t-worst", ["Route", "On time", "Median delay", "Vehicles"],
-    rows.map(r => [r.route_name || r.route_id, fmt.pct1(r.pct_on_time),
-                   fmt.mins(r.median_delay_s), fmt.int(r.n_trips)]));
+  renderTable("t-worst", ["Route", "Evenly spaced", "Bunched", "Median headway", "Headways"],
+    rows.map(r => [r.route_name || r.route_id, fmt.pct1(r.pct_regular), fmt.pct1(r.pct_bunched),
+                   fmt.mins(r.median_headway_s), fmt.int(r.n_gaps)]));
 }
 
 function renderHourly() {
   const rows = (state.trend && state.trend.hourly) || [];
   columns($("#c-hourly"), {
-    rows, value: r => r.pct_on_time, label: r => fmt.hour(r.hour),
+    rows, value: r => r.pct_regular, label: r => fmt.hour(r.hour),
     colorVar: "--series-1", valueLabel: v => Math.round(v) + "%", yMin: 0,
-    tooltipRows: r => [["On time", fmt.pct1(r.pct_on_time)], ["Samples", fmt.int(r.n)]],
+    tooltipRows: r => [["Evenly spaced", fmt.pct1(r.pct_regular)], ["Samples", fmt.int(r.n)]],
     height: 214,
   });
-  renderTable("t-hourly", ["Hour", "On time", "Samples"],
-    rows.map(r => [fmt.hour(r.hour), fmt.pct1(r.pct_on_time), fmt.int(r.n)]));
+  renderTable("t-hourly", ["Hour", "Evenly spaced", "Samples"],
+    rows.map(r => [fmt.hour(r.hour), fmt.pct1(r.pct_regular), fmt.int(r.n)]));
 }
 
 function renderHistory() {
