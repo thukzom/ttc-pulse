@@ -77,8 +77,8 @@
   },
   {
    "hour": 15,
-   "n": 0,
-   "pct_regular": null
+   "n": 1,
+   "pct_regular": 62.4
   },
   {
    "hour": 16,
@@ -123,158 +123,11 @@
  ],
  "series": [
   {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T04:37:22Z",
-   "vehicles": 662
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T05:03:57Z",
-   "vehicles": 622
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T05:42:03Z",
-   "vehicles": 422
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T06:17:49Z",
-   "vehicles": 299
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T07:11:00Z",
-   "vehicles": 186
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T07:59:32Z",
-   "vehicles": 170
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T08:49:33Z",
-   "vehicles": 243
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T09:20:03Z",
-   "vehicles": 494
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T09:54:47Z",
-   "vehicles": 894
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T10:25:41Z",
-   "vehicles": 1125
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T10:57:18Z",
-   "vehicles": 1266
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T11:28:24Z",
-   "vehicles": 1357
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T11:55:06Z",
-   "vehicles": 1411
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T13:34:57Z",
-   "vehicles": 1258
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T14:18:29Z",
-   "vehicles": 1160
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T14:59:53Z",
-   "vehicles": 1149
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T15:41:42Z",
-   "vehicles": 1139
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T16:15:01Z",
-   "vehicles": 1141
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T16:54:34Z",
-   "vehicles": 1146
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T17:25:18Z",
-   "vehicles": 1158
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T17:56:16Z",
-   "vehicles": 1182
-  },
-  {
-   "median_headway_s": null,
-   "pct_bunched": null,
-   "pct_regular": null,
-   "ts_utc": "2026-08-20T18:37:40Z",
-   "vehicles": 1315
+   "median_headway_s": 347.0,
+   "pct_bunched": 19.6,
+   "pct_regular": 62.4,
+   "ts_utc": "2026-08-20T19:18:03Z",
+   "vehicles": 1454
   }
  ]
 }
