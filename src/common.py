@@ -48,17 +48,38 @@ DELAY_PACKAGES = {
 # ---------------------------------------------------------------------------
 # Analysis constants
 # ---------------------------------------------------------------------------
-# On-time window. A trip counts as on time if it is running between 1 minute
-# early and 5 minutes late. This mirrors the convention most North American
-# transit agencies publish against, so the number is comparable to TTC's own
-# service standards rather than being an arbitrary cut of our own.
-ON_TIME_EARLY_S = -60
-ON_TIME_LATE_S = 300
+# --- Headway regularity ---------------------------------------------------
+# The TTC feed publishes predicted arrival times for trips marked
+# `schedule_relationship: NEW`, i.e. trips with no counterpart in the published
+# timetable. There is therefore no scheduled time to subtract, and schedule
+# adherence ("on-time performance") cannot be computed from it. See the module
+# docstring in aggregate.py for the evidence. What the feed does support is
+# headway regularity, which is the metric that matters on frequent service
+# anyway: riders who turn up without checking a timetable care about even
+# spacing, not punctuality against a schedule they never read.
 
-# A GTFS-RT delay value beyond this is treated as a feed artifact and dropped.
-# Real surface-transit delays do not legitimately exceed ~2 hours; values in the
-# tens of thousands of seconds appear when a vehicle's trip assignment is stale.
-MAX_PLAUSIBLE_DELAY_S = 7200
+# How far forward to trust predictions. Beyond an hour the agency's estimate is
+# mostly its own model extrapolating, not a measurement of what is on the road.
+PREDICTION_WINDOW_S = 3600
+
+# Plausible band for a headway between consecutive vehicles at one stop.
+# Under 30s is almost always the same vehicle reported twice rather than two
+# genuine arrivals; over an hour means the next vehicle is too far out to say
+# anything about current service.
+HEADWAY_MIN_S = 30
+HEADWAY_MAX_S = 3600
+
+# A stop needs at least this many gaps before its regularity is reported.
+# Below it, one early vehicle swings the percentage to a meaningless extreme.
+MIN_GAPS_PER_STOP = 3
+
+# A gap counts as regular when it falls within these multiples of the local
+# average headway at that stop. Below the floor is bunching (vehicles arriving
+# together); above the ceiling is a gap in service. The comparison is relative
+# because a 4-minute gap is normal on King and a sign of bunching on a route
+# that runs every 20 minutes.
+REGULAR_LOW = 0.5
+REGULAR_HIGH = 1.5
 
 # Toronto is UTC-5 (EST) / UTC-4 (EDT). Timestamps are stored in UTC and
 # converted for display; see to_toronto().

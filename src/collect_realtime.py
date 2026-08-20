@@ -112,15 +112,17 @@ def decode_vehicles(feed) -> list[dict]:
     return out
 
 
-def decode_trip_updates(feed) -> list[dict]:
+def decode_predictions(feed) -> list[dict]:
     """
-    Pull one representative delay per active trip.
+    Pull every predicted stop arrival out of the TripUpdate feed.
 
-    A TripUpdate carries a StopTimeUpdate per upcoming stop; the first one with
-    a delay is the vehicle's current running deviation, which is the figure the
-    rider actually experiences. Later stops carry projections that get less
-    reliable the further out they are, so taking the first avoids compounding
-    the agency's own forecast error into our measurement.
+    The TTC feed gives absolute epoch times and no `delay` field, and marks its
+    trips `schedule_relationship: NEW`, so there is nothing to compare against a
+    timetable. What we extract instead is (route, stop, trip, predicted time) -
+    the raw material for headway regularity, computed in aggregate.py.
+
+    Departure time is used when a stop carries no arrival, which is how the
+    first stop of a trip is normally expressed.
     """
     out = []
     if feed is None:
@@ -129,20 +131,25 @@ def decode_trip_updates(feed) -> list[dict]:
         if not ent.HasField("trip_update"):
             continue
         tu = ent.trip_update
-        delay = None
-        if tu.HasField("delay"):
-            delay = tu.delay
-        else:
-            for stu in tu.stop_time_update:
-                if stu.HasField("arrival") and stu.arrival.HasField("delay"):
-                    delay = stu.arrival.delay
-                    break
-                if stu.HasField("departure") and stu.departure.HasField("delay"):
-                    delay = stu.departure.delay
-                    break
-        if delay is None:
+        route_id = tu.trip.route_id or ""
+        if not route_id:
             continue
-        out.append({"route_id": tu.trip.route_id or "", "delay_s": float(delay)})
+        # trip_id is synthetic and negative on this feed, but it is still a
+        # stable key *within* a snapshot, which is all the dedup needs.
+        trip_key = tu.trip.trip_id or ent.id
+        for stu in tu.stop_time_update:
+            stop_id = stu.stop_id or ""
+            if not stop_id:
+                continue
+            t = None
+            if stu.HasField("arrival") and stu.arrival.HasField("time"):
+                t = stu.arrival.time
+            elif stu.HasField("departure") and stu.departure.HasField("time"):
+                t = stu.departure.time
+            if not t:
+                continue
+            out.append({"route_id": route_id, "stop_id": stop_id,
+                        "trip_key": trip_key, "time": float(t)})
     return out
 
 
@@ -266,23 +273,24 @@ def main() -> int:
 
     if args.fixture:
         sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tests"))
-        vehicles, trips, alerts, routes = fixture_inputs()
-        log(f"FIXTURE MODE: {len(vehicles)} vehicles, {len(trips)} trip updates")
+        vehicles, predictions, alerts, routes = fixture_inputs()
+        log(f"FIXTURE MODE: {len(vehicles)} vehicles, {len(predictions)} stop predictions")
     else:
         routes = load_routes(refresh=args.refresh_routes)
         vehicles = decode_vehicles(fetch_feed(GTFSRT_VEHICLES))
-        trips = decode_trip_updates(fetch_feed(GTFSRT_TRIPS))
+        predictions = decode_predictions(fetch_feed(GTFSRT_TRIPS))
         alerts = decode_alerts(fetch_feed(GTFSRT_ALERTS))
-        log(f"fetched {len(vehicles)} vehicles, {len(trips)} trip updates, {len(alerts)} alerts")
+        log(f"fetched {len(vehicles)} vehicles, {len(predictions)} stop predictions, {len(alerts)} alerts")
 
         # Guard against committing an empty snapshot when every feed is down.
         # A missing row is honest; a row of zeros is a lie that would show up as
         # a reliability cliff on the trend chart.
-        if not vehicles and not trips:
+        if not vehicles and not predictions:
             log("ERROR all feeds empty - skipping this snapshot rather than recording zeros")
             return 1
 
-    rows = build_snapshot(ts, vehicles, trips, alerts, routes)
+    rows = build_snapshot(ts, vehicles, predictions, alerts, routes,
+                          now_epoch=utcnow().timestamp())
     append_snapshot(rows)
 
     write_json(SITE_DATA / "live.json", build_live_payload(rows))
@@ -294,7 +302,8 @@ def main() -> int:
     )
 
     live = build_live_payload(rows)["system"]
-    log(f"snapshot ok: {live['vehicles']} vehicles, on-time {live['pct_on_time']}%")
+    log(f"snapshot ok: {live['vehicles']} vehicles, {live['gaps']} headways measured "
+        f"across {live['stops_measured']} stops, {live['pct_regular']}% regular")
     return 0
 
 

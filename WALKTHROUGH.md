@@ -9,13 +9,21 @@ yours" so the code has your fingerprints on it.
 ## 1. The one-paragraph version
 
 > I built a dashboard that tracks TTC reliability. A GitHub Actions job hits the
-> TTC's realtime feed every ten minutes, computes on-time performance per route,
-> and commits the result back to the repo — so the git history is the time-series
-> database, with no server to pay for. Separately I pull the City of Toronto's
-> delay archives going back to 2014, about a million records across three
-> networks with a schema that changes almost every year, normalise them into one
-> table, and aggregate them. The site is a single self-contained HTML file served
-> from GitHub Pages.
+> TTC's realtime feed every ten minutes, measures how evenly spaced vehicles are
+> on each route, and commits the result back to the repo — so the git history is
+> the time-series database, with no server to pay for. Separately I pull the City
+> of Toronto's delay archives back to 2014, hundreds of thousands of records
+> across three networks with a schema that changes almost every year, normalise
+> them into one table, and aggregate them. The site is a single self-contained
+> HTML file served from GitHub Pages.
+>
+> The interesting part was that my first metric didn't work. I built it to measure
+> on-time performance, and it came back empty. When I inspected the raw feed I
+> found every trip is flagged `schedule_relationship: NEW` with no delay field —
+> they're dynamically generated trips with no timetable counterpart, so schedule
+> adherence literally isn't computable from that feed. I switched to headway
+> regularity, which is the metric transit planners actually use for frequent
+> service, and which the feed does support.
 
 If you only memorise one thing, memorise that. It covers ingestion, scheduling,
 storage, cleaning, aggregation, and deployment in six sentences.
@@ -74,20 +82,57 @@ City's servers and slow for no benefit.
 
 ---
 
+## 2b. The metric change — lead with this
+
+This is the strongest story in the project, so do not bury it.
+
+**What happened:** the dashboard shipped, the vehicle count was live and correct,
+and every reliability number was blank. Rather than guess, I wrote a throwaway
+diagnostic workflow that dumped what the feed actually contained. It returned
+1,045 trip updates, 17,571 predicted arrival times, and **zero delay fields** —
+every trip carrying `schedule_relationship: NEW` and a synthetic negative
+trip_id.
+
+**What that means:** `NEW` trips don't exist in the published timetable. There is
+no scheduled arrival to subtract from the predicted one. On-time performance was
+never going to work, and no amount of debugging my decoder would have changed it.
+
+**What I did instead:** measured headway regularity. For each route and stop, take
+the predicted arrivals, sort them, difference consecutive values to get headways,
+and classify each gap against that stop's own average — bunched below 50%, gapped
+above 150%, regular in between. That's the metric planners use for frequent
+service, and it's arguably the better one: a rider who turns up without checking
+a timetable doesn't care about punctuality, they care that three buses came at
+once and then nothing for twenty minutes.
+
+**Why this is worth telling:** it shows you validate assumptions against real data
+instead of trusting a spec, that you diagnose rather than guess, and that you can
+change your mind about a metric when the evidence says the metric is wrong. That
+is a more useful signal than a dashboard that worked first time.
+
+---
+
 ## 3. The cleaning decisions (this is the part interviewers dig into)
 
 Real data analysis is 80% deciding what to throw away. Every one of these is a
 judgement call you should be able to justify.
 
-**Implausible delays are dropped.** `MAX_PLAUSIBLE_DELAY_S = 7200`. GTFS-RT
-feeds emit delays of 30,000–90,000 seconds when a vehicle is still broadcasting
-against a trip it finished hours ago. Those aren't delays, they're stale trip
-assignments. Two hours is the cutoff because a genuine surface-transit delay
-doesn't exceed it.
+**Headways outside 30s–60min are dropped.** Under 30 seconds is almost always the
+same vehicle reported twice rather than two genuine arrivals; over an hour means
+the next vehicle is too far out to say anything about current service.
 *Follow-up you should expect:* "How do you know you're not throwing away real
-extreme delays?" Honest answer: you can't be certain, which is why the headline
-figures are medians — the cleaning and the statistic are two independent
-defences against the same problem.
+extreme gaps?" Honest answer: you can't be certain, which is why the headline
+figure is a median and why the bunched/gapped split is reported separately — the
+filter and the statistic are two independent defences against the same problem.
+
+**Regularity is judged relative to each stop, not on an absolute threshold.** A
+four-minute gap is perfectly normal on King and a sign of bunching on a route
+that runs every twenty minutes. Each stop is compared against its own average
+headway, which is what makes one number comparable across a whole network.
+
+**Route-level variability is the median of its stops' variability, not a
+coefficient computed over all gaps pooled together.** Pooling stops with
+genuinely different headways would report their difference as irregularity.
 
 **Negative delays are nulled, but the row is kept.** In the historical archive,
 a negative "Min Delay" is a data-entry error. But the incident still happened,
@@ -104,10 +149,12 @@ exists specifically to catch that regression.
 sometimes in the same column. `format="mixed"` resolves per value. Guessing one
 format for the column silently mangles the other half.
 
-**A minimum-observation floor on rankings.** Routes need ≥5 reporting vehicles
-to appear in "least reliable". Without it, a route with two vehicles and one
-stuck bus shows 0% on time and tops the list forever.
-`test_live_payload_applies_observation_floor` locks this in.
+**Minimum-sample floors in two places.** A stop needs at least three headways
+before its regularity is reported, and a route needs at least twelve measured
+headways before it can be ranked. Without them, a route with one qualifying stop
+and three gaps shows 0% regular and tops the worst list on pure noise.
+`test_live_payload_applies_sample_floor` and `test_stop_needs_enough_gaps` lock
+this in.
 
 **Empty feeds produce no row at all.** If everything is unreachable, the script
 exits 1 without writing. A gap in the chart is honest; a row of zeros reads as a
@@ -150,15 +197,22 @@ dashboard reads. Then the workflow commits and pushes, rebasing first in case a
 previous run is still landing.
 
 **"Why medians instead of averages?"**
-Delay distributions have a long right tail and the feed contains artifacts. One
-stale vehicle reporting a 40,000-second delay moves a mean enormously and a
+Headway distributions have a long right tail — one vehicle held at a terminal
+produces a gap several times the norm, which moves a mean enormously and a
 median not at all.
 
+**"What does a coefficient of variation of 0.6 mean?"**
+The standard deviation of headways is 60% of the mean headway. Below about 0.3
+riders experience the service as dependable; above 0.5 it feels random no matter
+how frequent the timetable claims it is.
+
 **"What's the weakest part of this?"**
-Be honest — pick one and own it. Good candidates: the on-time threshold is a
-convention I adopted rather than derived; the subway has no realtime feed so the
-live layer covers surface only; the hourly profile applies a fixed UTC offset
-rather than a proper timezone database, which is fine over weeks of aggregation
+Be honest — pick one and own it. Good candidates: the 50–150% regularity band is a
+convention I chose rather than derived from rider outcomes; headways are measured
+from *predicted* arrivals, so I'm partly measuring the quality of the TTC's own
+predictions rather than purely the service; the subway publishes no realtime feed
+so the live layer is surface-only; and the hourly profile applies a fixed UTC
+offset rather than a timezone database, which is fine over weeks of aggregation
 but wrong on the two DST changeover days a year.
 
 **"How would you scale this to a real agency?"**

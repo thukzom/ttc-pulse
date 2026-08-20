@@ -13,10 +13,10 @@ analysis of every delay the agency has published.
 
 Two data layers answer two different questions.
 
-**The live layer** samples the TTC's GTFS-Realtime feed every 10 minutes,
-computes on-time performance for every surface route currently reporting, and
-appends the result to a growing archive. It answers *how is the system running
-right now, and how has it run this week*.
+**The live layer** samples the TTC's GTFS-Realtime feed every 10 minutes and
+measures how evenly spaced vehicles are on every surface route currently
+reporting, appending the result to a growing archive. It answers *how is the
+system running right now, and how has it run this week*.
 
 **The historical layer** pulls the delay archives the City of Toronto publishes
 monthly — roughly a million incident records across subway, bus and streetcar
@@ -24,9 +24,25 @@ going back to 2014 — normalises a decade of inconsistent schemas into one tabl
 and aggregates it. It answers *what actually causes delays, when do they happen,
 and is it getting worse*.
 
-A trip counts as **on time** when it is running between 1 minute early and 5
-minutes late, which is the convention most North American transit agencies
-publish against.
+### Why headway regularity rather than on-time performance
+
+The obvious metric is schedule adherence. It is not computable from this feed,
+and finding that out was the most instructive part of building this.
+
+Inspecting the raw feed shows every TripUpdate carries
+`schedule_relationship: NEW` with a synthetic negative trip_id, and every
+StopTimeUpdate carries an absolute `arrival.time` with no `delay` field. `NEW`
+means the trip has no counterpart in the published timetable — so there is no
+scheduled arrival to subtract from the predicted one. It is a *prediction* feed,
+not a schedule-deviation feed.
+
+What it does support is the measure that matters more on frequent service: are
+vehicles evenly spaced? For each route and stop, predicted arrivals are sorted,
+consecutive gaps are taken, and each gap is classified against that stop's own
+average headway — **bunched** below 50%, **gapped** above 150%, **regular** in
+between. Bunching is the dominant failure mode of high-frequency transit, and a
+rider who turns up without consulting a timetable feels it far more than
+punctuality.
 
 ## How it works
 
@@ -108,20 +124,19 @@ first real collection so synthetic rows never mix into the archive.
 | `docs/index.html` | the dashboard: one self-contained file, no build step, no CDN |
 | `tests/` | offline test suite and the synthetic-data generators |
 | `data/realtime/` | collected snapshots, one CSV per month |
-| `.github/workflows/` | the three schedules: collect, history, tests |
+| `.github/workflows/` | the schedules: collect, history, tests |
 
 ## Design decisions worth knowing about
 
-**Medians, not means.** GTFS-RT feeds emit garbage when a vehicle keeps
-broadcasting against a trip it finished hours ago — delays of 30,000+ seconds
-appear regularly. Those are filtered at ingest (`clean_delays`), and every
-headline figure is a median so that whatever slips through the filter cannot
-drag the number.
+**Medians, not means.** Headway distributions have a long right tail — a single
+vehicle held at a terminal produces a gap several times the norm. Implausible
+gaps are filtered at ingest (`gaps_from_times`), and every headline figure is a
+median so whatever slips through the filter cannot drag the number.
 
-**A minimum-observation floor on rankings.** A route with two reporting vehicles
-and one stuck bus shows 0% on time. Without a floor it would top the "least
-reliable" list every single time and the chart would be noise. Routes need at
-least five reporting vehicles to be ranked.
+**Minimum-sample floors in two places.** A stop needs at least three measured
+headways before its regularity counts, and a route needs at least twelve before
+it can be ranked. Without them, a route with one qualifying stop and three gaps
+shows 0% regular and tops the "most irregular" list on pure noise.
 
 **Missing data stays missing.** If every feed is unreachable, the run exits
 without writing anything rather than recording a row of zeros. A gap in the

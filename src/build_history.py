@@ -161,28 +161,48 @@ def load_mode(mode: str, package: str, since_year: int | None) -> pd.DataFrame:
 
 
 def load_code_descriptions() -> dict[str, str]:
-    """Subway delay codes are opaque ('SUDP'); this maps them to plain English."""
+    """
+    Map opaque delay codes to plain English.
+
+    Each network publishes its own code lookup: the subway uses codes like
+    "SUDP", and the bus and streetcar archives switched from free-text incident
+    names to codes such as "MFDV" and "EFO" in later years. Loading only the
+    subway lookup leaves those surface codes untranslated, which is exactly what
+    showed up on the live dashboard - "MFDV" ranked third by delay hours with no
+    indication of what it meant. So every package is scanned for a lookup table.
+    """
     lookup: dict[str, str] = {}
-    try:
-        for res in ckan_resources(DELAY_PACKAGES["subway"]):
-            name = (res.get("name") or "").lower()
-            if "code" not in name or (res.get("format") or "").upper() not in {"XLSX", "CSV"}:
-                continue
-            blob = http_get(res["url"])
-            buf = io.BytesIO(blob)
-            df = pd.read_excel(buf) if name.endswith("xlsx") or (res.get("format") == "XLSX") \
-                else pd.read_csv(buf, encoding_errors="replace")
-            cols = [str(c).strip().lower() for c in df.columns]
-            df.columns = cols
-            code_col = next((c for c in cols if "code" in c), None)
-            desc_col = next((c for c in cols if "desc" in c), None)
-            if code_col and desc_col:
+    for mode, package in DELAY_PACKAGES.items():
+        try:
+            for res in ckan_resources(package):
+                name = (res.get("name") or "").lower()
+                fmt = (res.get("format") or "").upper()
+                if fmt not in {"XLSX", "CSV"}:
+                    continue
+                # Lookup tables are named things like "Code Descriptions" or
+                # "ttc-subway-delay-codes"; the data files never are.
+                if not re.search(r"code", name) or re.search(r"delay.?data", name):
+                    continue
+                blob = http_get(res["url"])
+                buf = io.BytesIO(blob)
+                df = pd.read_excel(buf) if fmt == "XLSX" else pd.read_csv(buf, encoding_errors="replace")
+                df.columns = [str(c).strip().lower() for c in df.columns]
+                code_col = next((c for c in df.columns if "code" in c), None)
+                desc_col = next((c for c in df.columns if "desc" in c), None)
+                if not (code_col and desc_col):
+                    continue
+                added = 0
                 for c, d in zip(df[code_col], df[desc_col]):
                     if pd.notna(c) and pd.notna(d):
-                        lookup[str(c).strip()] = str(d).strip()
-        log(f"  loaded {len(lookup)} delay code descriptions")
-    except Exception as exc:  # noqa: BLE001
-        log(f"  WARN could not load code descriptions: {exc}")
+                        key = str(c).strip()
+                        if key and key not in lookup:
+                            lookup[key] = str(d).strip()
+                            added += 1
+                if added:
+                    log(f"    {mode}: +{added} code descriptions from {res.get('name')}")
+        except Exception as exc:  # noqa: BLE001
+            log(f"  WARN could not load {mode} code descriptions: {exc}")
+    log(f"  {len(lookup)} delay code descriptions loaded")
     return lookup
 
 
