@@ -1,0 +1,57 @@
+name: Rebuild historical layer
+
+# The City of Toronto republishes the TTC delay archives monthly, so this runs
+# monthly rather than continuously. It downloads every archive file, normalises
+# a decade of inconsistent schemas into one table, and regenerates
+# docs/data/history.json.
+
+on:
+  schedule:
+    - cron: "17 6 8 * *"    # 06:17 UTC on the 8th, after the monthly publication
+  workflow_dispatch:
+    inputs:
+      since:
+        description: "Only load archive files from this year onward (blank = all)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45      # a full 2014-present rebuild downloads ~40 files
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build historical layer
+        run: |
+          if [ -n "${{ inputs.since }}" ]; then
+            python src/build_history.py --since "${{ inputs.since }}"
+          else
+            python src/build_history.py
+          fi
+
+      - name: Commit
+        run: |
+          git config user.name  "ttc-pulse-bot"
+          git config user.email "actions@github.com"
+          git add docs/data/history.json
+          # data/processed/ holds the full parquet, which is too large to commit
+          # on every rebuild; it is gitignored and regenerated on demand instead.
+          if git diff --staged --quiet; then
+            echo "no change to commit"
+          else
+            git commit -m "data: rebuild historical layer"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            git push
+          fi
