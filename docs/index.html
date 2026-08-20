@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TTC Pulse — live and historical transit reliability</title>
+<meta name="description" content="A live dashboard tracking Toronto Transit Commission surface reliability, updated every 10 minutes, alongside ten years of published delay records.">
+<style>
+/* ------------------------------------------------------------------
+   Design tokens. Light and dark are two selected palettes, not an
+   automatic inversion: each set of series colours was stepped for its
+   own surface and validated for colour-vision separation.
+   ------------------------------------------------------------------ */
+:root, :root[data-theme="light"] {
+  color-scheme: light;
+  --plane:          #f9f9f7;
+  --surface:        #fcfcfb;
+  --ink:            #0b0b0b;
+  --ink-2:          #52514e;
+  --ink-muted:      #898781;
+  --grid:           #e1e0d9;
+  --axis:           #c3c2b7;
+  --border:         rgba(11,11,11,0.10);
+  --series-1:       #2a78d6;
+  --series-2:       #eb6834;
+  --series-3:       #1baf7a;
+  --good:           #0ca30c;
+  --warning:        #fab219;
+  --serious:        #ec835a;
+  --critical:       #d03b3b;
+  --shadow:         0 1px 2px rgba(11,11,11,.05), 0 4px 16px rgba(11,11,11,.04);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --plane:          #0d0d0d;
+  --surface:        #1a1a19;
+  --ink:            #ffffff;
+  --ink-2:          #c3c2b7;
+  --ink-muted:      #898781;
+  --grid:           #2c2c2a;
+  --axis:           #383835;
+  --border:         rgba(255,255,255,0.10);
+  --series-1:       #3987e5;
+  --series-2:       #d95926;
+  --series-3:       #199e70;
+  --good:           #0ca30c;
+  --warning:        #fab219;
+  --serious:        #ec835a;
+  --critical:       #d03b3b;
+  --shadow:         none;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--plane);
+  color: var(--ink);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 64px; }
+
+/* ---------- header ---------- */
+header.top { display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; margin-bottom: 26px; }
+header.top .titles { flex: 1 1 420px; }
+h1 { font-size: 26px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.01em; }
+.sub { color: var(--ink-2); font-size: 14px; margin: 0; max-width: 68ch; }
+.stamp { color: var(--ink-muted); font-size: 12.5px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+button.ghost {
+  background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 12px; font: inherit; font-size: 13px; cursor: pointer;
+}
+button.ghost:hover { color: var(--ink); }
+button.ghost:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; }
+
+/* ---------- sections & cards ---------- */
+section { margin-top: 34px; }
+h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2);
+     margin: 0 0 4px; font-weight: 600; }
+.section-note { color: var(--ink-muted); font-size: 13px; margin: 0 0 16px; max-width: 72ch; }
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 18px 18px 14px; box-shadow: var(--shadow);
+}
+.grid { display: grid; gap: 16px; }
+.g-4 { grid-template-columns: repeat(4, 1fr); }
+.g-2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 900px) { .g-4 { grid-template-columns: repeat(2, 1fr); } .g-2 { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .g-4 { grid-template-columns: 1fr; } }
+
+/* ---------- stat tiles ---------- */
+.tile .label { font-size: 12.5px; color: var(--ink-2); margin-bottom: 6px; }
+.tile .value { font-size: 32px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; }
+.tile .foot { font-size: 12.5px; color: var(--ink-muted); margin-top: 6px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600;
+  border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; color: var(--ink-2);
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+
+/* ---------- chart chrome ---------- */
+.chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 2px; }
+.chart-title { font-size: 15px; font-weight: 600; margin: 0; }
+.chart-sub { font-size: 12.5px; color: var(--ink-muted); margin: 2px 0 12px; }
+.chart-host { width: 100%; }
+svg { display: block; width: 100%; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0 0; padding: 0; list-style: none; }
+.legend li { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); }
+.legend .swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+
+.tbl-toggle { background: none; border: none; color: var(--ink-2); font: inherit; font-size: 12.5px;
+              cursor: pointer; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+.tbl-toggle:hover { color: var(--ink); }
+table.data { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px;
+             font-variant-numeric: tabular-nums; }
+table.data th, table.data td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--grid); }
+table.data th:first-child, table.data td:first-child { text-align: left; }
+table.data th { color: var(--ink-2); font-weight: 600; }
+.hidden { display: none; }
+
+/* ---------- tooltip ---------- */
+#tip {
+  position: fixed; pointer-events: none; z-index: 50; opacity: 0; transition: opacity .08s;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-shadow: 0 4px 18px rgba(0,0,0,.14);
+  max-width: 260px; font-variant-numeric: tabular-nums;
+}
+#tip .t-title { font-weight: 600; margin-bottom: 3px; }
+#tip .t-row { color: var(--ink-2); display: flex; gap: 10px; justify-content: space-between; }
+
+.empty { color: var(--ink-muted); font-size: 13.5px; padding: 26px 4px; text-align: center; }
+.banner {
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--border));
+  border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--ink-2); margin-bottom: 18px;
+}
+footer { margin-top: 46px; padding-top: 18px; border-top: 1px solid var(--grid);
+         color: var(--ink-muted); font-size: 12.5px; }
+footer a { color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="titles">
+      <h1>TTC Pulse</h1>
+      <p class="sub">
+        Surface-network reliability for the Toronto Transit Commission, sampled from the
+        agency's live GTFS-Realtime feed every 10 minutes and set against ten years of
+        published delay records. A trip counts as <strong>on time</strong> when it is running
+        between 1 minute early and 5 minutes late.
+      </p>
+      <p class="stamp" id="stamp">Loading…</p>
+    </div>
+    <button class="ghost" id="theme-btn" aria-label="Switch colour theme">Dark mode</button>
+  </header>
+
+  <div id="demo-banner" class="banner hidden">
+    <strong>Preview data.</strong> This page is currently showing synthetic sample data so the
+    layout can be reviewed before collection starts. Real figures appear after the first
+    scheduled run.
+  </div>
+
+  <!-- ============================= LIVE ============================= -->
+  <section>
+    <h2>Right now</h2>
+    <p class="section-note">
+      The most recent 10-minute sample of every surface vehicle reporting to the TTC's realtime feed.
+    </p>
+
+    <div class="grid g-4" id="tiles"></div>
+
+    <div class="grid g-2" style="margin-top:16px">
+      <div class="card">
+        <div class="chart-head"><h3 class="chart-title">On-time performance, past 7 days</h3></div>
+        <p class="chart-sub">Share of tracked trips running on time, one point per 10-minute sample.</p>
+        <div class="chart-host" id="c-trend"></div>
+        <button class="tbl-toggle" data-table="t-trend">Show data table</button>
+        <div id="t-trend" class="hidden"></div>
+      </div>
+
+      <div class="card">
+        <div class="chart-head"><h3 class="chart-title">Least reliable routes right now</h3></div>
+        <p class="chart-sub">Routes with at least 5 reporting vehicles, ranked by on-time share.</p>
+        <div class="chart-host" id="c-worst"></div>
+        <button class="tbl-toggle" data-table="t-worst">Show data table</button>
+        <div id="t-worst" class="hidden"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="chart-head"><h3 class="chart-title">When the system struggles</h3></div>
+      <p class="chart-sub">Average on-time share by hour of the Toronto day, across every sample collected so far.</p>
+      <div class="chart-host" id="c-hourly"></div>
+      <button class="tbl-toggle" data-table="t-hourly">Show data table</button>
+      <div id="t-hourly" class="hidden"></div>
+    </div>
+  </section>
+
+  <!-- =========================== HISTORICAL =========================== -->
+  <section>
+    <h2>The long view</h2>
+    <p class="section-note" id="hist-note">
+      Every delay the TTC has logged on the subway, bus and streetcar networks since 2014.
+    </p>
+
+    <div class="grid g-2">
+      <div class="card">
+        <div class="chart-head"><h3 class="chart-title">Delay hours logged per month</h3></div>
+        <p class="chart-sub">Total minutes of recorded delay across all three networks, by month.</p>
+        <div class="chart-host" id="c-month"></div>
+        <button class="tbl-toggle" data-table="t-month">Show data table</button>
+        <div id="t-month" class="hidden"></div>
+      </div>
+
+      <div class="card">
+        <div class="chart-head"><h3 class="chart-title">What actually causes delays</h3></div>
+        <p class="chart-sub">Top causes ranked by total delay hours, not incident count.</p>
+        <div class="chart-host" id="c-causes"></div>
+        <button class="tbl-toggle" data-table="t-causes">Show data table</button>
+        <div id="t-causes" class="hidden"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="chart-head"><h3 class="chart-title">Incidents by hour of day, per network</h3></div>
+      <p class="chart-sub">Each network has its own shape: comparing them is the point.</p>
+      <div class="chart-host" id="c-modehour"></div>
+      <ul class="legend" id="l-modehour"></ul>
+      <button class="tbl-toggle" data-table="t-modehour">Show data table</button>
+      <div id="t-modehour" class="hidden"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="chart-head"><h3 class="chart-title">Lines and routes with the most lost time</h3></div>
+      <p class="chart-sub">Cumulative delay hours since 2014.</p>
+      <div class="chart-host" id="c-lines"></div>
+      <button class="tbl-toggle" data-table="t-lines">Show data table</button>
+      <div id="t-lines" class="hidden"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Data: <a href="https://open.toronto.ca/" target="_blank" rel="noopener">City of Toronto Open Data</a>
+      (TTC delay archives) and the TTC GTFS-Realtime feed. Collected automatically every 10 minutes
+      by GitHub Actions; every historical value is in the repository's git history.
+      This is an independent project and is not affiliated with or endorsed by the TTC.
+    </p>
+  </footer>
+</div>
+
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ====================================================================
+   A small charting layer, written from scratch.
+
+   No chart library: the page has to survive on GitHub Pages with no build
+   step and no CDN, and hand-drawn SVG keeps the whole dashboard to one
+   file. Every chart follows the same contract - measure the host element,
+   build a scale, emit SVG, attach a hover layer.
+   ==================================================================== */
+
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const SVGNS = "http://www.w3.org/2000/svg";
+
+const fmt = {
+  int:  n => (n === null || n === undefined || Number.isNaN(n)) ? "–" : Math.round(n).toLocaleString("en-CA"),
+  pct1: n => (n === null || n === undefined || Number.isNaN(n)) ? "–" : n.toFixed(1) + "%",
+  mins: s => (s === null || s === undefined || Number.isNaN(s)) ? "–" : (s / 60).toFixed(1) + " min",
+  hour: h => { const ampm = h < 12 ? "am" : "pm"; const hh = h % 12 === 0 ? 12 : h % 12; return hh + ampm; },
+  month: m => { const [y, mo] = m.split("-"); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+mo - 1] + " " + y; },
+  clock: iso => new Date(iso).toLocaleString("en-CA", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
+  day:   iso => new Date(iso).toLocaleDateString("en-CA", { month: "short", day: "numeric" }),
+};
+
+function el(tag, attrs = {}, text) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) if (v !== null && v !== undefined) n.setAttribute(k, v);
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+/* ---------------- tooltip ---------------- */
+const tip = $("#tip");
+function showTip(evt, title, rows) {
+  tip.innerHTML = `<div class="t-title">${title}</div>` +
+    rows.map(r => `<div class="t-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join("");
+  tip.style.opacity = "1";
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  if (x + w > innerWidth - 8)  x = evt.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = evt.clientY - h - pad;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip() { tip.style.opacity = "0"; }
+
+/* ---------------- scales ---------------- */
+const linear = (d0, d1, r0, r1) => v => d1 === d0 ? r0 : r0 + (v - d0) / (d1 - d0) * (r1 - r0);
+
+function niceTicks(min, max, count = 5) {
+  if (min === max) return [min];
+  const span = max - min;
+  const step0 = Math.pow(10, Math.floor(Math.log10(span / count)));
+  const err = span / count / step0;
+  const step = step0 * (err >= 7.5 ? 10 : err >= 3.5 ? 5 : err >= 1.5 ? 2 : 1);
+  const out = [];
+  for (let t = Math.ceil(min / step) * step; t <= max + step * 1e-9; t += step) out.push(+t.toFixed(10));
+  return out;
+}
+
+/* ====================================================================
+   Line chart. Single or multi series, crosshair + tooltip by default.
+   ==================================================================== */
+function lineChart(host, opts) {
+  const {
+    series, xLabel = v => v, yLabel = v => v, yMin = null, yMax = null,
+    tooltipTitle = i => String(i), tooltipRows = null, height = 240, directLabel = true,
+  } = opts;
+  host.innerHTML = "";
+  const W = host.clientWidth || 600, H = height;
+  const M = { t: 14, r: directLabel && series.length > 1 ? 74 : 14, b: 26, l: 46 };
+  const iw = Math.max(10, W - M.l - M.r), ih = H - M.t - M.b;
+
+  const n = Math.max(...series.map(s => s.values.length));
+  const all = series.flatMap(s => s.values).filter(v => v !== null && !Number.isNaN(v));
+  if (!all.length) { host.innerHTML = '<p class="empty">No data yet.</p>'; return; }
+  const lo = yMin !== null ? yMin : Math.min(...all), hi = yMax !== null ? yMax : Math.max(...all);
+  const pad = (hi - lo) * 0.08 || 1;
+  const y = linear(yMin !== null ? lo : lo - pad, yMax !== null ? hi : hi + pad, M.t + ih, M.t);
+  const x = linear(0, n - 1, M.l, M.l + iw);
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H, role: "img" });
+
+  // Recessive grid, drawn first so marks sit above it.
+  for (const t of niceTicks(y.invertLo ?? lo, hi, 5)) {
+    const yy = y(t);
+    if (yy < M.t - 1 || yy > M.t + ih + 1) continue;
+    svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: yy, y2: yy, stroke: cssVar("--grid"), "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: M.l - 8, y: yy + 4, "text-anchor": "end", fill: cssVar("--ink-muted"),
+                                 "font-size": 11 }, yLabel(t)));
+  }
+  svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih,
+                               stroke: cssVar("--axis"), "stroke-width": 1 }));
+
+  // X labels: a handful, evenly spaced, never every point. Each candidate is
+  // measured against the previous one's right edge and dropped if it would
+  // collide, so a narrow chart thins its own axis instead of overprinting.
+  const nLab = Math.min(6, n);
+  let lastRight = -Infinity;
+  for (let k = 0; k < nLab; k++) {
+    const i = Math.round(k * (n - 1) / Math.max(1, nLab - 1));
+    const txt = String(xLabel(i));
+    if (!txt) continue;
+    const w = txt.length * 6.1;                      // ~11px system sans
+    const anchor = k === 0 ? "start" : k === nLab - 1 ? "end" : "middle";
+    const left = anchor === "start" ? x(i) : anchor === "end" ? x(i) - w : x(i) - w / 2;
+    if (left < lastRight + 10) continue;
+    lastRight = left + w;
+    svg.appendChild(el("text", { x: x(i), y: H - 6, "text-anchor": anchor,
+                                 fill: cssVar("--ink-muted"), "font-size": 11 }, txt));
+  }
+
+  const endLabels = [];
+  series.forEach((s, si) => {
+    const color = cssVar(s.colorVar);
+    let d = "", pen = false;
+    s.values.forEach((v, i) => {
+      if (v === null || Number.isNaN(v)) { pen = false; return; }
+      d += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1) + " ";
+      pen = true;
+    });
+    svg.appendChild(el("path", { d, fill: "none", stroke: color, "stroke-width": 2,
+                                 "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    // Direct label at the series end, so identity never rests on colour alone.
+    if (directLabel && series.length > 1) {
+      let li = s.values.length - 1;
+      while (li > 0 && (s.values[li] === null || Number.isNaN(s.values[li]))) li--;
+      if (s.values[li] !== null && !Number.isNaN(s.values[li])) {
+        endLabels.push({ name: s.name, x: x(li) + 8, y: y(s.values[li]) });
+      }
+    }
+  });
+
+  // Series ending close together would overprint their labels, so nudge them
+  // apart vertically before drawing. Order is preserved, only spacing changes.
+  if (endLabels.length > 1) {
+    const MIN_GAP = 14;
+    endLabels.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < endLabels.length; i++) {
+      if (endLabels[i].y - endLabels[i - 1].y < MIN_GAP)
+        endLabels[i].y = endLabels[i - 1].y + MIN_GAP;
+    }
+    const overflow = endLabels[endLabels.length - 1].y - (M.t + ih);
+    if (overflow > 0) endLabels.forEach(l => { l.y -= overflow; });
+  }
+  endLabels.forEach(l =>
+    svg.appendChild(el("text", { x: l.x, y: l.y + 4, fill: cssVar("--ink-2"), "font-size": 11.5 }, l.name)));
+
+  // Crosshair layer.
+  const cross = el("line", { y1: M.t, y2: M.t + ih, stroke: cssVar("--axis"), "stroke-width": 1, opacity: 0 });
+  svg.appendChild(cross);
+  const dots = series.map(s => {
+    const c = el("circle", { r: 4.5, fill: cssVar(s.colorVar), stroke: cssVar("--surface"),
+                             "stroke-width": 2, opacity: 0 });
+    svg.appendChild(c); return c;
+  });
+  const hit = el("rect", { x: M.l, y: M.t, width: iw, height: ih, fill: "transparent" });
+  svg.appendChild(hit);
+
+  hit.addEventListener("pointermove", e => {
+    const bb = svg.getBoundingClientRect();
+    const px = (e.clientX - bb.left) * (W / bb.width);
+    const i = Math.max(0, Math.min(n - 1, Math.round((px - M.l) / iw * (n - 1))));
+    cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("opacity", 1);
+    series.forEach((s, si) => {
+      const v = s.values[i];
+      if (v === null || Number.isNaN(v)) { dots[si].setAttribute("opacity", 0); return; }
+      dots[si].setAttribute("cx", x(i)); dots[si].setAttribute("cy", y(v)); dots[si].setAttribute("opacity", 1);
+    });
+    showTip(e, tooltipTitle(i), tooltipRows ? tooltipRows(i) : series.map(s => [s.name, yLabel(s.values[i])]));
+  });
+  hit.addEventListener("pointerleave", () => {
+    cross.setAttribute("opacity", 0); dots.forEach(d => d.setAttribute("opacity", 0)); hideTip();
+  });
+
+  host.appendChild(svg);
+}
+
+/* ====================================================================
+   Horizontal bar chart. Rounded data-end, anchored to the baseline.
+   ==================================================================== */
+function barsH(host, opts) {
+  const { rows, value, label, colorVar = "--series-1", valueLabel = fmt.int,
+          tooltipRows = null, barH = 22, gap = 8 } = opts;
+  host.innerHTML = "";
+  if (!rows.length) { host.innerHTML = '<p class="empty">No data yet.</p>'; return; }
+
+  const W = host.clientWidth || 600;
+  const labelW = Math.min(210, Math.max(90, W * 0.34));
+  const valueW = 62;
+  const iw = Math.max(30, W - labelW - valueW - 10);
+  const H = rows.length * (barH + gap) + 4;
+  const max = Math.max(...rows.map(value)) || 1;
+  const x = linear(0, max, 0, iw);
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H, role: "img" });
+  const color = cssVar(colorVar);
+
+  rows.forEach((r, i) => {
+    const yy = i * (barH + gap);
+    const w = Math.max(2, x(value(r)));
+    svg.appendChild(el("text", { x: labelW - 10, y: yy + barH / 2 + 4, "text-anchor": "end",
+                                 fill: cssVar("--ink-2"), "font-size": 12.5 }, label(r)));
+    // rx gives the 4px rounded data-end; the fill still starts flush at the baseline.
+    const rect = el("rect", { x: labelW, y: yy, width: w, height: barH, rx: 4, fill: color });
+    svg.appendChild(rect);
+    svg.appendChild(el("text", { x: labelW + w + 8, y: yy + barH / 2 + 4, fill: cssVar("--ink-2"),
+                                 "font-size": 12.5 }, valueLabel(value(r))));
+    const hit = el("rect", { x: 0, y: yy - gap / 2, width: W, height: barH + gap, fill: "transparent" });
+    hit.addEventListener("pointermove", e =>
+      showTip(e, label(r), tooltipRows ? tooltipRows(r) : [["Value", valueLabel(value(r))]]));
+    hit.addEventListener("pointerleave", hideTip);
+    svg.appendChild(hit);
+  });
+  host.appendChild(svg);
+}
+
+/* ====================================================================
+   Column chart, used for the 24-hour profiles.
+   ==================================================================== */
+function columns(host, opts) {
+  const { rows, value, label, colorVar = "--series-1", valueLabel = fmt.int,
+          tooltipRows = null, height = 210, yMin = null } = opts;
+  host.innerHTML = "";
+  const vals = rows.map(value).filter(v => v !== null && !Number.isNaN(v));
+  if (!vals.length) { host.innerHTML = '<p class="empty">No data yet.</p>'; return; }
+
+  const W = host.clientWidth || 600, H = height;
+  const M = { t: 12, r: 8, b: 24, l: 44 };
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+  const lo = yMin !== null ? yMin : Math.min(...vals) * 0.96;
+  const hi = Math.max(...vals);
+  const y = linear(lo, hi, M.t + ih, M.t);
+  const step = iw / rows.length;
+  const bw = Math.max(3, step - 2);          // 2px surface gap between adjacent bars
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H, role: "img" });
+  for (const t of niceTicks(lo, hi, 4)) {
+    const yy = y(t);
+    if (yy < M.t - 1 || yy > M.t + ih + 1) continue;
+    svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: yy, y2: yy, stroke: cssVar("--grid"), "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: M.l - 8, y: yy + 4, "text-anchor": "end",
+                                 fill: cssVar("--ink-muted"), "font-size": 11 }, valueLabel(t)));
+  }
+  svg.appendChild(el("line", { x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih,
+                               stroke: cssVar("--axis"), "stroke-width": 1 }));
+
+  const color = cssVar(colorVar);
+  rows.forEach((r, i) => {
+    const v = value(r);
+    const xx = M.l + i * step + (step - bw) / 2;
+    if (v !== null && !Number.isNaN(v)) {
+      const top = y(v), h = Math.max(2, M.t + ih - top);
+      svg.appendChild(el("rect", { x: xx, y: top, width: bw, height: h, rx: 4, fill: color }));
+    }
+    if (i % 3 === 0) {
+      svg.appendChild(el("text", { x: xx + bw / 2, y: H - 6, "text-anchor": "middle",
+                                   fill: cssVar("--ink-muted"), "font-size": 11 }, label(r)));
+    }
+    const hit = el("rect", { x: M.l + i * step, y: M.t, width: step, height: ih, fill: "transparent" });
+    hit.addEventListener("pointermove", e =>
+      showTip(e, label(r), tooltipRows ? tooltipRows(r) : [["Value", valueLabel(v)]]));
+    hit.addEventListener("pointerleave", hideTip);
+    svg.appendChild(hit);
+  });
+  host.appendChild(svg);
+}
+
+/* ---------------- data tables (the accessibility fallback) ---------------- */
+function renderTable(hostId, headers, rows) {
+  const host = document.getElementById(hostId);
+  if (!host) return;
+  host.innerHTML =
+    '<table class="data"><thead><tr>' + headers.map(h => `<th>${h}</th>`).join("") +
+    "</tr></thead><tbody>" +
+    rows.map(r => "<tr>" + r.map(c => `<td>${c}</td>`).join("") + "</tr>").join("") +
+    "</tbody></table>";
+}
+$$(".tbl-toggle").forEach(btn => btn.addEventListener("click", () => {
+  const t = document.getElementById(btn.dataset.table);
+  const open = !t.classList.contains("hidden");
+  t.classList.toggle("hidden", open);
+  btn.textContent = open ? "Show data table" : "Hide data table";
+}));
+
+/* ---------------- status helpers ---------------- */
+function reliabilityStatus(p) {
+  if (p === null || p === undefined) return { var: "--ink-muted", word: "No data", mark: "–" };
+  if (p >= 75) return { var: "--good",     word: "Running well", mark: "●" };
+  if (p >= 60) return { var: "--warning",  word: "Some slippage", mark: "▲" };
+  if (p >= 45) return { var: "--serious",  word: "Degraded",      mark: "▲" };
+  return         { var: "--critical", word: "Widespread delays",  mark: "■" };
+}
+
+/* ====================================================================
+   Load and render
+   ==================================================================== */
+const state = { live: null, trend: null, history: null };
+
+async function loadJSON(path) {
+  try {
+    const r = await fetch(path, { cache: "no-store" });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch { return null; }
+}
+
+function renderTiles() {
+  const host = $("#tiles");
+  const s = state.live && state.live.system;
+  if (!s) {
+    host.innerHTML = '<div class="card" style="grid-column:1/-1">' +
+      '<p class="empty">Waiting for the first collection run.</p></div>';
+    return;
+  }
+  const st = reliabilityStatus(s.pct_on_time);
+  const tiles = [
+    { label: "On time now", value: fmt.pct1(s.pct_on_time),
+      foot: `<span class="pill"><span class="dot" style="background:${cssVar(st.var)}"></span>${st.mark} ${st.word}</span>` },
+    { label: "Vehicles tracked", value: fmt.int(s.vehicles), foot: `across ${fmt.int(s.routes_reporting)} routes` },
+    { label: "Median delay", value: fmt.mins(s.median_delay_s), foot: `90th percentile ${fmt.mins(s.p90_delay_s)}` },
+    { label: "Service alerts", value: fmt.int(s.alerts), foot: "active on the network" },
+  ];
+  host.innerHTML = tiles.map(t =>
+    `<div class="card tile"><div class="label">${t.label}</div>
+     <div class="value">${t.value}</div><div class="foot">${t.foot}</div></div>`).join("");
+}
+
+function renderTrend() {
+  const series = (state.trend && state.trend.series) || [];
+  const host = $("#c-trend");
+  if (!series.length) { host.innerHTML = '<p class="empty">Waiting for the first collection run.</p>'; return; }
+  lineChart(host, {
+    series: [{ name: "On time", colorVar: "--series-1", values: series.map(d => d.pct_on_time) }],
+    yLabel: v => Math.round(v) + "%",
+    xLabel: i => fmt.day(series[i].ts_utc),
+    tooltipTitle: i => fmt.clock(series[i].ts_utc),
+    tooltipRows: i => [["On time", fmt.pct1(series[i].pct_on_time)],
+                       ["Median delay", fmt.mins(series[i].median_delay_s)],
+                       ["Vehicles", fmt.int(series[i].vehicles)]],
+    height: 236,
+  });
+  renderTable("t-trend", ["Time", "On time", "Median delay", "Vehicles"],
+    series.slice(-48).reverse().map(d => [fmt.clock(d.ts_utc), fmt.pct1(d.pct_on_time),
+                                          fmt.mins(d.median_delay_s), fmt.int(d.vehicles)]));
+}
+
+function renderWorst() {
+  const rows = (state.live && state.live.worst_routes) || [];
+  barsH($("#c-worst"), {
+    rows, value: r => r.pct_on_time, label: r => r.route_name || r.route_id,
+    colorVar: "--series-2", valueLabel: v => v.toFixed(0) + "%",
+    tooltipRows: r => [["On time", fmt.pct1(r.pct_on_time)], ["Median delay", fmt.mins(r.median_delay_s)],
+                       ["Vehicles reporting", fmt.int(r.n_trips)]],
+  });
+  renderTable("t-worst", ["Route", "On time", "Median delay", "Vehicles"],
+    rows.map(r => [r.route_name || r.route_id, fmt.pct1(r.pct_on_time),
+                   fmt.mins(r.median_delay_s), fmt.int(r.n_trips)]));
+}
+
+function renderHourly() {
+  const rows = (state.trend && state.trend.hourly) || [];
+  columns($("#c-hourly"), {
+    rows, value: r => r.pct_on_time, label: r => fmt.hour(r.hour),
+    colorVar: "--series-1", valueLabel: v => Math.round(v) + "%", yMin: 0,
+    tooltipRows: r => [["On time", fmt.pct1(r.pct_on_time)], ["Samples", fmt.int(r.n)]],
+    height: 214,
+  });
+  renderTable("t-hourly", ["Hour", "On time", "Samples"],
+    rows.map(r => [fmt.hour(r.hour), fmt.pct1(r.pct_on_time), fmt.int(r.n)]));
+}
+
+function renderHistory() {
+  const h = state.history;
+  if (!h) {
+    ["#c-month", "#c-causes", "#c-modehour", "#c-lines"].forEach(id =>
+      $(id).innerHTML = '<p class="empty">Run <code>python src/build_history.py</code> to build this section.</p>');
+    return;
+  }
+  const m = h.meta || {};
+  $("#hist-note").textContent =
+    `${fmt.int(m.rows)} delay records from ${m.first_date} to ${m.last_date}, covering the ` +
+    `${(m.modes || []).join(", ")} networks — ${fmt.int(m.total_delay_hours)} hours of logged delay in total.`;
+
+  // Monthly delay hours
+  const months = (h.by_month || []);
+  lineChart($("#c-month"), {
+    series: [{ name: "Delay hours", colorVar: "--series-1",
+               values: months.map(d => (d.delay_minutes || 0) / 60) }],
+    yLabel: v => fmt.int(v), xLabel: i => months[i] ? months[i].month.slice(0, 4) : "",
+    tooltipTitle: i => fmt.month(months[i].month),
+    tooltipRows: i => [["Delay hours", fmt.int((months[i].delay_minutes || 0) / 60)],
+                       ["Incidents", fmt.int(months[i].incidents)],
+                       ["Median delay", (months[i].median_delay ?? 0).toFixed(1) + " min"]],
+    height: 236,
+  });
+  renderTable("t-month", ["Month", "Delay hours", "Incidents", "Median delay"],
+    months.slice().reverse().slice(0, 60).map(d => [fmt.month(d.month), fmt.int((d.delay_minutes||0)/60),
+      fmt.int(d.incidents), (d.median_delay ?? 0).toFixed(1) + " min"]));
+
+  // Causes
+  const causes = (h.top_causes || []).slice(0, 10);
+  barsH($("#c-causes"), {
+    rows: causes, value: r => (r.delay_minutes || 0) / 60,
+    label: r => String(r.cause).length > 34 ? String(r.cause).slice(0, 32) + "…" : r.cause,
+    colorVar: "--series-1", valueLabel: v => fmt.int(v) + "h",
+    tooltipRows: r => [["Delay hours", fmt.int((r.delay_minutes||0)/60)], ["Incidents", fmt.int(r.incidents)],
+                       ["Average", ((r.delay_minutes||0)/Math.max(1,r.incidents)).toFixed(1) + " min"]],
+    barH: 20, gap: 7,
+  });
+  renderTable("t-causes", ["Cause", "Delay hours", "Incidents"],
+    causes.map(r => [r.cause, fmt.int((r.delay_minutes||0)/60), fmt.int(r.incidents)]));
+
+  // Incidents by hour, one series per network
+  const modes = [...new Set((h.by_hour || []).map(r => r.mode))].sort();
+  const colorVars = ["--series-1", "--series-2", "--series-3"];
+  const byModeHour = modes.slice(0, 3).map((mode, i) => ({
+    name: mode.charAt(0).toUpperCase() + mode.slice(1), colorVar: colorVars[i],
+    values: Array.from({ length: 24 }, (_, hr) => {
+      const rec = (h.by_hour || []).find(r => r.mode === mode && r.hour === hr);
+      return rec ? rec.incidents : null;
+    }),
+  }));
+  lineChart($("#c-modehour"), {
+    series: byModeHour, yLabel: v => fmt.int(v), xLabel: i => fmt.hour(i),
+    tooltipTitle: i => fmt.hour(i) + " – " + fmt.hour((i + 1) % 24),
+    height: 250,
+  });
+  $("#l-modehour").innerHTML = byModeHour.map(s =>
+    `<li><span class="swatch" style="background:${cssVar(s.colorVar)}"></span>${s.name}</li>`).join("");
+  renderTable("t-modehour", ["Hour", ...byModeHour.map(s => s.name)],
+    Array.from({ length: 24 }, (_, hr) => [fmt.hour(hr), ...byModeHour.map(s => fmt.int(s.values[hr]))]));
+
+  // Worst lines
+  const lines = (h.worst_lines || []).slice(0, 12);
+  barsH($("#c-lines"), {
+    rows: lines, value: r => (r.delay_minutes || 0) / 60,
+    label: r => `${r.line} (${r.mode})`, colorVar: "--series-1", valueLabel: v => fmt.int(v) + "h",
+    tooltipRows: r => [["Delay hours", fmt.int((r.delay_minutes||0)/60)], ["Incidents", fmt.int(r.incidents)],
+                       ["Median delay", (r.median_delay ?? 0).toFixed(1) + " min"]],
+    barH: 20, gap: 7,
+  });
+  renderTable("t-lines", ["Line / route", "Network", "Delay hours", "Incidents"],
+    lines.map(r => [r.line, r.mode, fmt.int((r.delay_minutes||0)/60), fmt.int(r.incidents)]));
+}
+
+function renderAll() {
+  renderTiles(); renderTrend(); renderWorst(); renderHourly(); renderHistory();
+}
+
+/* ---------------- theme ---------------- */
+const themeBtn = $("#theme-btn");
+function setTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  themeBtn.textContent = t === "dark" ? "Light mode" : "Dark mode";
+  renderAll();                       // charts re-read the CSS variables
+}
+themeBtn.addEventListener("click", () =>
+  setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"));
+if (matchMedia("(prefers-color-scheme: dark)").matches)
+  document.documentElement.setAttribute("data-theme", "dark");
+
+/* ---------------- boot ---------------- */
+(async function boot() {
+  const [live, trend, history] = await Promise.all([
+    loadJSON("data/live.json"), loadJSON("data/trend.json"), loadJSON("data/history.json"),
+  ]);
+  Object.assign(state, { live, trend, history });
+
+  if (history && history.meta && history.meta.synthetic) $("#demo-banner").classList.remove("hidden");
+
+  $("#stamp").textContent = live && live.generated_utc
+    ? `Last sample ${fmt.clock(live.generated_utc)} · collected every 10 minutes`
+    : "No samples collected yet — the first scheduled run will populate this page.";
+
+  themeBtn.textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "Light mode" : "Dark mode";
+  renderAll();
+
+  let t;
+  addEventListener("resize", () => { clearTimeout(t); t = setTimeout(renderAll, 160); });
+})();
+</script>
+</body>
+</html>

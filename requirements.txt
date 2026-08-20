@@ -1,0 +1,9 @@
+# Realtime collection
+requests>=2.31
+gtfs-realtime-bindings>=1.0.0   # official Google protobuf bindings for GTFS-RT
+protobuf>=4.25
+
+# Historical layer
+pandas>=2.0
+openpyxl>=3.1                   # reads the .xlsx archive files
+pyarrow>=14.0                   # parquet output for the cleaned archive
