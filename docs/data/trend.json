@@ -42,8 +42,8 @@
   },
   {
    "hour": 8,
-   "n": 2,
-   "pct_regular": 71.8
+   "n": 3,
+   "pct_regular": 71.2
   },
   {
    "hour": 9,
@@ -933,6 +933,13 @@
    "pct_regular": 63.5,
    "ts_utc": "2026-08-23T11:40:44Z",
    "vehicles": 581
+  },
+  {
+   "median_headway_s": 404.0,
+   "pct_bunched": 15.6,
+   "pct_regular": 69.9,
+   "ts_utc": "2026-08-23T12:00:42Z",
+   "vehicles": 721
   }
  ]
 }
