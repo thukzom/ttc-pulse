@@ -163,6 +163,10 @@
   "mode": "bus",
   "route_name": "14 Glencairn"
  },
+ "145": {
+  "mode": "bus",
+  "route_name": "145 Belfield"
+ },
  "149": {
   "mode": "bus",
   "route_name": "149 Etobicoke-Bloor"
@@ -435,6 +439,10 @@
   "mode": "bus",
   "route_name": "343 Kennedy"
  },
+ "345": {
+  "mode": "bus",
+  "route_name": "345 Kipling"
+ },
  "35": {
   "mode": "bus",
   "route_name": "35 Jane"
@@ -466,6 +474,10 @@
  "37": {
   "mode": "bus",
   "route_name": "37 Islington"
+ },
+ "373": {
+  "mode": "bus",
+  "route_name": "373 Royal York"
  },
  "38": {
   "mode": "bus",
